@@ -69,32 +69,46 @@ class _AppWidgetState extends State<AppWidget>
               ),
             )),
         pane: NavigationPane(
-          selected: index,
-          onChanged: (newIndex) {
-            setState(() {
-              index = newIndex;
-              controller.animateToPage(
-                index,
-                duration: pageChanging,
-                curve: Curves.fastLinearToSlowEaseIn,
-              );
-            });
-          },
-          displayMode: PaneDisplayMode.auto,
-        ),
-
+            selected: index,
+            onChanged: (newIndex) {
+              setState(() {
+                index = newIndex;
+                controller.animateToPage(
+                  index,
+                  duration: pageChanging,
+                  curve: Curves.fastLinearToSlowEaseIn,
+                );
+              });
+            },
+            displayMode: PaneDisplayMode.auto,
+            items: [
+              PaneItem(
+                  icon: const Icon(FluentIcons.code),
+                  title: const Text("Sample Page 1"),
+                  body: Container(
+                    child: const Text("Sample Page 1"),
+                  )),
+              PaneItem(
+                  icon: const Icon(FluentIcons.encryption),
+                  title: const Text("Encryption"),
+                  body: Container(child: const Text("Sample Page 1"))),
+              PaneItem(
+                  icon: const Icon(FluentIcons.user_sync),
+                  title: const Text("Sample Page 3"),
+                  body: Container(child: const Text("Sample Page 1"))),
+            ]),
         // content: NavigationBody(
         content: PageView(
           // index: index,
           controller: controller,
           onPageChanged: onPageChanged,
-          children: const [
+          children: [
             ScaffoldPage(
-              header: Text(
+              header: const Text(
                 "Sample Page 1",
                 style: TextStyle(fontSize: 60),
               ),
-              padding: EdgeInsets.only(left: 20),
+              padding: const EdgeInsets.only(left: 20),
 
               /// Content property
               ///
@@ -102,7 +116,7 @@ class _AppWidgetState extends State<AppWidget>
               /// similar to the body property in a Material Scaffold
               content: Column(
                 children: [
-                  Center(
+                  const Center(
                     child: Text("Welcome to Page 1!"),
                   ),
                   // Button(
@@ -116,8 +130,8 @@ class _AppWidgetState extends State<AppWidget>
                 ],
               ),
             ),
-            EncryptionView(),
-            ScaffoldPage(
+            const EncryptionView(),
+            const ScaffoldPage(
               header: Text(
                 "Sample Page 2",
                 style: TextStyle(fontSize: 60),

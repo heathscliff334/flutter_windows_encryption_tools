@@ -1,5 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_encryption_app/src/components/custom_validator_message.dart';
+import 'package:flutter_encryption_app/src/components/default_content_layout.dart';
+import 'package:flutter_encryption_app/src/res/colors.dart';
 import 'package:flutter_encryption_app/src/res/dimens.dart';
 import 'package:flutter_encryption_app/src/services/encryption/encryption_service.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
@@ -32,117 +34,105 @@ class _EncryptionViewState extends State<EncryptionView>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // padding: const EdgeInsets.all(20),
-      child: ScaffoldPage(
-        padding: const EdgeInsets.all(20),
-        header: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Text(
-            "Encryption",
-            style: TextStyle(fontSize: 60),
+    return DefaultContentLayout(
+      contentHeader: Text(
+        "Encryption",
+        style: TextStyle(fontSize: 60),
+      ),
+      contentWidget: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InfoLabel(
+            label: 'Key Type:',
+            child: SizedBox(
+              width: 200,
+              child: ComboBox<String>(
+                placeholder: const Text('Selected secret key type'),
+                isExpanded: true,
+                items: values
+                    .map((Data data) => ComboBoxItem<String>(
+                          value: data.value.toString(),
+                          child: Text(data.label.toString()),
+                        ))
+                    .toList(),
+                value: comboBoxValue,
+                onChanged: (value) {
+                  // print(value);
+                  if (value != null) {
+                    setState(() => {
+                          comboBoxValue = value,
+                          _textBoxLength = int.parse(comboBoxValue!)
+                        });
+                  }
+                },
+              ),
+            ),
           ),
-        ),
-        content: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+          InfoLabel(
+            label: 'Secret-Key:',
+            child: Row(
               children: [
-                InfoLabel(
-                  label: 'Key Type:',
-                  child: SizedBox(
-                    width: 200,
-                    child: Combobox<String>(
-                      placeholder: const Text('Selected secret key type'),
-                      isExpanded: true,
-                      items: values
-                          .map((Data data) => ComboboxItem<String>(
-                                value: data.value.toString(),
-                                child: Text(data.label.toString()),
-                              ))
-                          .toList(),
-                      value: comboBoxValue,
-                      onChanged: (value) {
-                        // print(value);
-                        if (value != null) {
-                          setState(() => {
-                                comboBoxValue = value,
-                                _textBoxLength = int.parse(comboBoxValue!)
-                              });
-                        }
-                      },
-                    ),
-                  ),
-                ),
-                InfoLabel(
-                  label: 'Secret-Key:',
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextBox(
-                          placeholder: 'Enter your secret key',
-                          expands: false,
-                          enabled: _textBoxLength == null ? false : true,
-                          maxLength: _textBoxLength,
-                          controller: secretKeyController,
-                          onChanged: (value) => setState(
-                              () => _secretKey = secretKeyController.text),
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      Button(
-                        child: const Icon(material.Icons.add_rounded),
-                        onPressed: () => showContentDialog(context),
-                      )
-                    ],
-                  ),
-                ),
-                CustomValidatorMessage(
-                    visibility:
-                        _secretKey != null && _secretKey != "" ? true : false,
-                    errorMsg: "Secret-key length: ${_secretKey?.length}"),
-                const SizedBox(height: 10),
-                InfoLabel(
-                  label: 'Plain-Text:',
+                Expanded(
                   child: TextBox(
-                    placeholder: 'Enter your Plain-text',
+                    placeholder: 'Enter your secret key',
                     expands: false,
-                    maxLines: null,
-                    controller: inputController,
+                    enabled: _textBoxLength == null ? false : true,
+                    maxLength: _textBoxLength,
+                    controller: secretKeyController,
                     onChanged: (value) =>
-                        setState(() => _plainText = inputController.text),
+                        setState(() => _secretKey = secretKeyController.text),
                   ),
                 ),
-                const SizedBox(height: 10),
-                FilledButton(
-                    child: const Text("Encrypt"),
-                    onPressed: (_plainText == null && _secretKey == null)
-                        ? null
-                        : () {
-                            final secretKey =
-                                encrypt.Key.fromUtf8(secretKeyController.text);
-                            String encryptionResult = EncryptionService()
-                                .aesEncryption(inputController.text, secretKey,
-                                    bits: 16);
-                            outputController.text = encryptionResult;
-                          }),
-                const SizedBox(height: 10),
-                InfoLabel(
-                  label: 'Output:',
-                  child: TextBox(
-                    placeholder: 'Your encryption output',
-                    expands: false,
-                    readOnly: true,
-                    maxLines: 5,
-                    controller: outputController,
-                  ),
-                ),
+                const SizedBox(width: 5),
+                Button(
+                  child: const Icon(material.Icons.add_rounded),
+                  onPressed: () => showContentDialog(context),
+                )
               ],
             ),
           ),
-        ),
+          CustomValidatorMessage(
+              visibility: _secretKey != null && _secretKey != "" ? true : false,
+              errorMsg: "Secret-key length: ${_secretKey?.length}",
+              textColor: descriptionFontColor),
+          const SizedBox(height: 10),
+          InfoLabel(
+            label: 'Plain-Text:',
+            child: TextBox(
+              placeholder: 'Enter your Plain-text',
+              expands: false,
+              maxLines: null,
+              controller: inputController,
+              onChanged: (value) =>
+                  setState(() => _plainText = inputController.text),
+            ),
+          ),
+          const SizedBox(height: 10),
+          FilledButton(
+              child: const Text("Encrypt"),
+              onPressed: (_plainText == null && _secretKey == null)
+                  ? null
+                  : () {
+                      final secretKey =
+                          encrypt.Key.fromUtf8(secretKeyController.text);
+                      String encryptionResult = EncryptionService()
+                          .aesEncryption(inputController.text, secretKey,
+                              bits: 16);
+                      outputController.text = encryptionResult;
+                    }),
+          const SizedBox(height: 10),
+          InfoLabel(
+            label: 'Output:',
+            child: TextBox(
+              placeholder: 'Your encryption output',
+              expands: false,
+              readOnly: true,
+              maxLines: 5,
+              controller: outputController,
+            ),
+          ),
+        ],
       ),
     );
   }

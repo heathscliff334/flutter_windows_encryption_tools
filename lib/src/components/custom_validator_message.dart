@@ -2,29 +2,29 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 
 class CustomValidatorMessage extends StatelessWidget {
-  const CustomValidatorMessage({
+  CustomValidatorMessage({
     Key? key,
-    required bool? visibility,
-    required String? errorMsg,
-  })  : _visibility = visibility,
-        _errorMsg = errorMsg,
-        super(key: key);
+    required this.visibility,
+    required this.errorMsg,
+    this.textColor,
+  }) : super(key: key);
 
-  final bool? _visibility;
-  final String? _errorMsg;
+  final bool? visibility;
+  final String? errorMsg;
+  Color? textColor;
 
   @override
   Widget build(BuildContext context) {
     return Visibility(
-      visible: _visibility!,
+      visible: visibility!,
       child: FlipInX(
         child: Container(
           // padding: const EdgeInsets.symmetric(horizontal: 10),
           margin: const EdgeInsets.only(top: 5),
           child: Text(
-            _errorMsg.toString(),
+            errorMsg.toString(),
             style: TextStyle(
-              color: Colors.red.shade700,
+              color: textColor ?? Colors.red.shade700,
               fontSize: 12,
             ),
           ),

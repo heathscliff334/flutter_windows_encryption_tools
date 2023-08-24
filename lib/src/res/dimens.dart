@@ -24,6 +24,7 @@ const PAD_SYM_V10 = EdgeInsets.symmetric(vertical: 10);
 const PAD_SYM_V30 = EdgeInsets.symmetric(vertical: 30);
 const PAD_ALL_20 = EdgeInsets.all(20);
 const PAD_ASYM_H25_V20 = EdgeInsets.symmetric(horizontal: 25.0, vertical: 20.0);
+const PAD_ASYM_H20_V20 = EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0);
 const PAD_ASYM_H25_V10 = EdgeInsets.symmetric(horizontal: 25.0, vertical: 10.0);
 const PAD_ALL_15 = EdgeInsets.all(15);
 const PAD_ALL_18 = EdgeInsets.all(18);
