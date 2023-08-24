@@ -1,8 +1,13 @@
+import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_encryption_app/src/components/custom_validator_message.dart';
 import 'package:flutter_encryption_app/src/components/default_content_layout.dart';
+import 'package:flutter_encryption_app/src/models/app_config_model.dart';
 import 'package:flutter_encryption_app/src/res/colors.dart';
-import 'package:flutter_encryption_app/src/res/dimens.dart';
 import 'package:flutter_encryption_app/src/services/encryption/encryption_service.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/material.dart' as material;
@@ -20,6 +25,9 @@ class _EncryptionViewState extends State<EncryptionView>
   bool get wantKeepAlive => true;
   String selectedColor = 'Green';
   String? _secretKey, _plainText;
+  String filePath = '/config.json';
+  // File? configFile;
+
   TextEditingController inputController = TextEditingController();
   TextEditingController secretKeyController = TextEditingController();
   TextEditingController outputController = TextEditingController();
@@ -31,11 +39,16 @@ class _EncryptionViewState extends State<EncryptionView>
   ];
   String? comboBoxValue;
   int? _textBoxLength;
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return DefaultContentLayout(
-      contentHeader: Text(
+      contentHeader: const Text(
         "Encryption",
         style: TextStyle(fontSize: 60),
       ),
@@ -58,7 +71,7 @@ class _EncryptionViewState extends State<EncryptionView>
                     .toList(),
                 value: comboBoxValue,
                 onChanged: (value) {
-                  // print(value);
+                  // debugPrint(value);
                   if (value != null) {
                     setState(() => {
                           comboBoxValue = value,
@@ -109,18 +122,59 @@ class _EncryptionViewState extends State<EncryptionView>
             ),
           ),
           const SizedBox(height: 10),
-          FilledButton(
-              child: const Text("Encrypt"),
-              onPressed: (_plainText == null && _secretKey == null)
-                  ? null
-                  : () {
-                      final secretKey =
-                          encrypt.Key.fromUtf8(secretKeyController.text);
-                      String encryptionResult = EncryptionService()
-                          .aesEncryption(inputController.text, secretKey,
-                              bits: 16);
-                      outputController.text = encryptionResult;
-                    }),
+          Row(
+            children: [
+              FilledButton(
+                  onPressed: (_plainText == null && _secretKey == null)
+                      ? null
+                      : () {
+                          String trimmedString = inputController.text
+                              .toString()
+                              .replaceAll(' ', '')
+                              .replaceAll('\n', '');
+                          debugPrint("remove space => $trimmedString");
+                          var jsonData =
+                              AppConfig.fromJsonString(trimmedString);
+
+                          inspect(jsonData);
+
+                          debugPrint(
+                              "jsonData (appMinimumVersion) => ${jsonData.appMinimumVersion}");
+                          final secretKey =
+                              encrypt.Key.fromUtf8(secretKeyController.text);
+                          String encryptionResult = EncryptionService()
+                              .aesEncryption(trimmedString, secretKey,
+                                  bits: 16);
+                          outputController.text = encryptionResult;
+                        },
+                  child: const Text("Encrypt")),
+              const SizedBox(width: 20),
+              FilledButton(
+                  onPressed: (_plainText == null && _secretKey == null)
+                      ? null
+                      : () async {
+                          try {
+                            var result = await FilePicker.platform
+                                .saveFile(fileName: 'config.hcplusMoba');
+                            log(result.toString());
+                            if (result != null) {
+                              File configFile = File(result);
+                              String configJson =
+                                  jsonEncode(outputController.text);
+                              await configFile.writeAsString(configJson);
+                              debugPrint(
+                                  'config.json file generated and saved.');
+                            } else {
+                              debugPrint('No file selected by the user.');
+                            }
+                          } catch (e) {
+                            debugPrint(
+                                'Error generating or saving config.json file: $e');
+                          }
+                        },
+                  child: const Text("Export")),
+            ],
+          ),
           const SizedBox(height: 10),
           InfoLabel(
             label: 'Output:',
@@ -138,8 +192,8 @@ class _EncryptionViewState extends State<EncryptionView>
   }
 
   void showContentDialog(BuildContext context) async {
-    TextEditingController _keyLabel = TextEditingController();
-    TextEditingController _keySecret = TextEditingController();
+    TextEditingController keyLabel = TextEditingController();
+    TextEditingController keySecret = TextEditingController();
     ContentDialog dialog = ContentDialog(
       title: const Text('Add New Key'),
       content: SizedBox(
@@ -152,7 +206,7 @@ class _EncryptionViewState extends State<EncryptionView>
               child: TextBox(
                 placeholder: 'Enter your label',
                 expands: false,
-                controller: _keyLabel,
+                controller: keyLabel,
               ),
             ),
             InfoLabel(
@@ -160,7 +214,7 @@ class _EncryptionViewState extends State<EncryptionView>
               child: TextBox(
                 placeholder: 'Enter your secret key',
                 expands: false,
-                controller: _keySecret,
+                controller: keySecret,
               ),
             ),
           ],
