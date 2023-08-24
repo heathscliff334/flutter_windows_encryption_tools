@@ -133,13 +133,13 @@ class _EncryptionViewState extends State<EncryptionView>
                               .replaceAll(' ', '')
                               .replaceAll('\n', '');
                           debugPrint("remove space => $trimmedString");
-                          var jsonData =
-                              AppConfig.fromJsonString(trimmedString);
+                          // var jsonData =
+                          //     AppConfig.fromJsonString(trimmedString);
 
-                          inspect(jsonData);
+                          // inspect(jsonData);
 
-                          debugPrint(
-                              "jsonData (appMinimumVersion) => ${jsonData.appMinimumVersion}");
+                          // debugPrint(
+                          //     "jsonData (appMinimumVersion) => ${jsonData.appMinimumVersion}");
                           final secretKey =
                               encrypt.Key.fromUtf8(secretKeyController.text);
                           String encryptionResult = EncryptionService()
